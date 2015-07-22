@@ -1,0 +1,4 @@
+default:
+    server:
+        port: 80
+        key: osCJvZBNWtexC8zmc3sr

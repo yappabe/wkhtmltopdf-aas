@@ -1,0 +1,20 @@
+{
+    "name": "wkhtmltopdf-aas",
+    "description": "A package to run wkhtmltopdf as a nodejs service",
+    "author": "Joeri Verdeyen <joeriv@yappa.be>",
+    "version": "1.0.0",
+    "dependencies": {
+        "console-stamp": "^0.1.6",
+        "node-uuid": "^1.4.3",
+        "node-yaml-config": "0.0.3"
+    },
+    "engine": "node >= 0.10.37",
+    "private": true,
+    "scripts": {
+        "start": "node app.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/yappabe/wkhtmltopdf-ass.git"
+    }
+}
