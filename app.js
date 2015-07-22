@@ -11,37 +11,62 @@ var RequestParser,
 
 var server = http.createServer(function(request, response) {
 
+    var ip = request.headers['x-forwarded-for'] ||
+        request.connection.remoteAddress ||
+        request.socket.remoteAddress ||
+        request.connection.socket.remoteAddress;
 
-    if (request.headers['auth-key'] != settings.server.key) {
-        console.log('Invalid Key provided %s', request.headers['auth-key']);
+    console.log('Request from %s', ip);
+
+    if (request.headers['api-key'] != settings.server.api_key) {
+        var message = 'Invalid api key provided';
+        console.error(message);
+        response.statusMessage = 'message';
         response.statusCode = 401;
-        response.statusMessage = 'Invalid Auth Key';
-        response.end();
+        response.end(message);
         return;
     }
 
     requestParser = new RequestParser();
 
-    requestParser.handle(request, response, function(parsedOptions) {
+    requestParser.handle(request, response, function(error, parsedOptions) {
+
+        if (error) {
+            console.error(error);
+            response.statusCode = 500;
+            response.end('Invalid JSON: ' + error.message);
+            return;
+        }
 
         var destination = __dirname + '/' +  uuid.v1() + '.pdf';
 
         console.info('Parsed request for %s', destination);
 
+        parsedOptions.command = settings.wkhtmltopdf.bin;
+
         pdfCreator = new Pdf(parsedOptions);
 
-        pdfCreator.generate(destination, function() {
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
-            response.setHeader('content-type', 'application/pdf');
+        pdfCreator.generate(
+            function(error, stdout, stderror){
+                console.log(stdout);
+                console.error(stderror);
+                response.statusCode = 500;
+                response.end('wkhtmltopdf failed');
+                return;
+            },
+            destination,
+            function() {
+                response.setHeader("Access-Control-Allow-Origin", "*");
+                response.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+                response.setHeader('content-type', 'application/pdf');
 
-            var readStream = fs.createReadStream(destination);
-            readStream.pipe(response);
-            readStream.on('end', function() {
-                console.log('Sending file %s', destination);
-                fs.unlink(destination);
+                var readStream = fs.createReadStream(destination);
+                readStream.pipe(response);
+                readStream.on('end', function() {
+                    console.log('Sending file %s', destination);
+                    fs.unlink(destination);
 
-            });
+                });
         });
     });
 

@@ -1,4 +1,6 @@
 default:
     server:
-        port: 80
-        key: osCJvZBNWtexC8zmc3sr
+        port: 8080
+        api_key: p12dwLY085UrVsxECjkMc0x1WE63Z54K
+    wkhtmltopdf:
+        bin: /usr/local/bin/wkhtmltopdf
