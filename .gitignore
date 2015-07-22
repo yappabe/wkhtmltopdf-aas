@@ -18,3 +18,5 @@ build/Release
 node_modules
 
 .DS_Store
+
+config/settings.yml
